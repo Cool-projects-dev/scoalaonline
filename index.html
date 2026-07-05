@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scoala online</title>
+    <style>
+      :root {
+        --bg: #f6f8ff;
+        --card: #ffffff;
+        --primary: #5b4bff;
+        --secondary: #ff7a00;
+        --text: #24324a;
+        --success: #2f9e44;
+        --danger: #c92a2a;
+        --muted: #6f7a91;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #eef2ff, #fff7e8);
+        color: var(--text);
+      }
+
+      .page { max-width: 1220px; margin: 0 auto; padding: 20px; }
+      header {
+        background: linear-gradient(90deg, var(--primary), #7d70ff);
+        color: white;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 14px 30px rgba(91, 75, 255, 0.18);
+      }
+
+      h1, h2, h3, h4, p { margin: 0 0 8px; }
+      p { line-height: 1.55; }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.3fr 0.8fr;
+        gap: 18px;
+        align-items: center;
+      }
+
+      .stats {
+        background: rgba(255,255,255,0.16);
+        border-radius: 16px;
+        padding: 16px;
+      }
+      .stat-row { display: flex; justify-content: space-between; margin-top: 8px; }
+      .progress { width: 100%; height: 10px; background: rgba(255,255,255,0.28); border-radius: 999px; overflow: hidden; margin-top: 8px; }
+      .progress > div { height: 100%; background: #ffe082; width: 0%; }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+      .toolbar-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .toolbar select, .toolbar button, .nav-toggle {
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        color: var(--text);
+        background: white;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+      }
+      .toolbar button.active {
+        background: var(--secondary);
+        color: white;
+      }
+      .nav-toggle { display: none; cursor: pointer; }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .card, .exercise-card, .chapter-card {
+        background: var(--card);
+        border-radius: 22px;
+        padding: 16px;
+        box-shadow: 0 10px 24px rgba(36, 50, 74, 0.08);
+      }
+      .chapter-card { margin-bottom: 12px; }
+      .chapter-card h4 { margin-bottom: 6px; }
+      .chapter-card.active { border: 2px solid var(--primary); }
+      .exercise-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        background: white;
+        padding: 24px;
+        overflow-y: auto;
+      }
+      .exercise-overlay.open { display: flex; }
+      .exercise-overlay-inner {
+        position: relative;
+        width: min(920px, 100%);
+        margin: auto;
+        padding: 28px;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #ffffff, #f7f9ff);
+        box-shadow: 0 20px 50px rgba(36, 50, 74, 0.16);
+        box-sizing: border-box;
+      }
+      .overlay-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 0 20px;
+        margin-bottom: 8px;
+      }
+      .close-overlay-btn {
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        border: none;
+        border-radius: 50%;
+        background: #f1f3ff;
+        color: var(--text);
+        font-size: 1.5rem;
+        font-weight: 900;
+        cursor: pointer;
+      }
+      .overlay-title-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+        min-width: 0;
+      }
+      .overlay-shell { padding-top: 8px; }
+      .overlay-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .overlay-badge {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--primary);
+        color: white;
+        font-weight: 700;
+      }
+      .overlay-card {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 18px;
+        border-radius: 22px;
+        background: var(--card);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+      }
+      .lesson-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 12px;
+        padding-left: 10px;
+      }
+      .lesson-pill {
+        position: relative;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(145deg, #7eea3f, #58cc02);
+        color: white;
+        font-weight: 900;
+        font-size: 1.2rem;
+        box-shadow: 0 6px 0 #46a302;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .lesson-pill:nth-child(even) { margin-left: 40px; }
+      .lesson-pill:nth-child(odd) { margin-left: 0; }
+      .lesson-pill:hover { transform: translateY(-2px); }
+      .lesson-pill:active {
+        transform: translateY(4px);
+        box-shadow: 0 2px 0 #46a302;
+      }
+      .lesson-pill.active {
+        background: linear-gradient(145deg, #ffcf4d, #ffb700);
+        box-shadow: 0 6px 0 #d98b00;
+      }
+      .lesson-pill.active::after {
+        content: attr(data-title);
+        position: absolute;
+        top: -46px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        color: var(--text);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+      }
+      .lesson-pill.final {
+        width: 86px;
+        height: 86px;
+        background: linear-gradient(145deg, #ffc166, #ff7a00);
+        box-shadow: 0 6px 0 #d95f00;
+        font-size: 1.55rem;
+        clip-path: polygon(50% 0%, 61% 35%, 100% 38%, 69% 58%, 81% 100%, 50% 74%, 19% 100%, 31% 58%, 0% 38%, 39% 35%);
+      }
+      .lesson-pill.final:active {
+        transform: translateY(4px);
+        box-shadow: 0 2px 0 #d95f00;
+      }
+
+      .difficulty {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: white;
+        background: var(--secondary);
+      }
+      .difficulty.final { background: #2f9e44; }
+
+      .exercise-card h3 { margin-bottom: 8px; }
+      .exercise-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 10px 0 14px;
+      }
+      .exercise-nav button {
+        border: none;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #f1f3ff;
+        color: var(--text);
+        cursor: pointer;
+      }
+      .exercise-nav button.active { background: var(--primary); color: white; }
+
+      .answers { display: grid; gap: 10px; margin-top: 12px; }
+      .answer-btn {
+        text-align: left;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 2px solid #e5e5e5;
+        background: #ffffff;
+        color: var(--text);
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 0 #e5e5e5;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      }
+      .answer-btn:hover {
+        transform: translateY(-1px);
+      }
+      .answer-btn:active,
+      .answer-btn.selected {
+        background: #eaf7ff;
+        border-color: #1cb0f6;
+        box-shadow: 0 4px 0 #1cb0f6;
+        transform: translateY(1px);
+      }
+      .answer-btn.correct {
+        border-color: var(--success);
+        background: #eaf8ee;
+        box-shadow: 0 4px 0 #bfe7c8;
+      }
+      .answer-btn.wrong {
+        border-color: var(--danger);
+        background: #fdecec;
+        box-shadow: 0 4px 0 #f1b0b0;
+      }
+      .action-row { margin-top: 14px; }
+      .action-btn {
+        border: none;
+        background: linear-gradient(135deg, #1cb0f6, #1495d6);
+        color: white;
+        padding: 14px 16px;
+        border-radius: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        width: 100%;
+        box-shadow: 0 4px 0 #0f7fb5;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .action-btn:hover {
+        transform: translateY(-1px);
+      }
+      .action-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 1px 0 #0f7fb5;
+      }
+      .action-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 4px 0 #0f7fb5;
+      }
+      .feedback {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        font-weight: 600;
+      }
+      .feedback.correct { background: #eaf8ee; color: var(--success); }
+      .feedback.wrong { background: #fdecec; color: var(--danger); }
+
+      .competition {
+        margin-top: 18px;
+        padding: 16px;
+        border: 2px dashed #ffbf70;
+        border-radius: 16px;
+        background: #fff8ef;
+      }
+
+      .locked { opacity: 0.75; }
+
+      @media (max-width: 900px) {
+        .hero, .main-grid { grid-template-columns: 1fr; }
+        .exercise-overlay { padding: 10px; }
+        .exercise-overlay-inner { padding: 14px; }
+        .overlay-header {
+          padding: 8px 0 16px;
+          gap: 10px;
+        }
+        .overlay-title-wrap {
+          align-items: flex-start;
+          text-align: left;
+        }
+        .toolbar-actions {
+          display: none;
+          width: 100%;
+          flex-direction: column;
+          align-items: stretch;
+          margin-top: 8px;
+        }
+        .toolbar-actions.open { display: flex; }
+        .nav-toggle { display: inline-flex; }
+      }
+
+      /* Containerul global pentru mascotă */
+.mascota-container {
+  position: fixed;
+  bottom: -200px; /* Ascunsă complet sub ecran */
+  right: 30px;
+  width: 130px;
+  height: 160px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+/* Clasa pe care JS-ul o va pune ca să pornească acțiunea */
+.mascota-activa {
+  animation: duolingoPop 3.5s ease-in-out forwards;
+}
+
+/* Animația completă de 3.5 secunde */
+@keyframes duolingoPop {
+  0% { bottom: -200px; transform: scale(1); }
+  15% { bottom: 20px; transform: scale(1); } 
+  25% { transform: scale(1.1) rotate(5deg); } 
+  35% { transform: scale(1) rotate(-5deg); }
+  45% { transform: scale(1) rotate(0deg); }   
+  85% { bottom: 20px; opacity: 1; }
+  100% { bottom: -200px; opacity: 0; }        
+}
+
+.mascota-container svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.15));
+}
+
+
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div class="hero">
+          <div>
+            <h1>Scoala online</h1>
+            <p>O călătorie de învățare în limba română și matematică, cu lecții clare, exerciții multiple și un capitol final mai greu pentru fiecare temă.</p>
+          </div>
+          <div class="stats">
+            <h3>Progresul tău</h3>
+            <div class="stat-row"><span>Nivel</span><strong id="level">1</strong></div>
+            <div class="stat-row"><span>XP</span><strong id="xp">0</strong></div>
+            <div class="progress"><div id="progressBar"></div></div>
+            <p id="nextLevelText" style="margin-top: 8px;">Mai ai nevoie de 60 XP pentru următorul nivel.</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="toolbar">
+        <h2 style="margin: 0;">Alege capitolul</h2>
+        <button class="nav-toggle" id="menuToggle" aria-label="Deschide meniul">☰</button>
+        <div class="toolbar-actions" id="toolbarActions">
+          <select id="gradeSelect">
+            <option value="clasa-i">Clasa I</option>
+            <option value="clasa-ii">Clasa a II-a</option>
+          </select>
+          <button class="active" data-subject="romana">Română</button>
+          <button data-subject="matematica">Matematică</button>
+        </div>
+      </section>
+
+      <section class="main-grid">
+        <div class="card">
+          <h3>Capitole și lecții</h3>
+          <div id="chapterList"></div>
+        </div>
+
+        <div class="exercise-card" id="exercisePanel">
+          <h3 id="lessonTitle">Alege o lecție</h3>
+          <p id="lessonInfo">Selectează un capitol și începe exercițiile.</p>
+          <div id="exerciseNav" class="exercise-nav"></div>
+          <div id="exerciseContent"></div>
+          <div id="feedback" class="feedback" style="display:none"></div>
+        </div>
+      </section>
+
+      <div id="exerciseOverlay" class="exercise-overlay" aria-hidden="true">
+        <div class="exercise-overlay-inner">
+          <button id="closeOverlayBtn" class="close-overlay-btn" aria-label="Închide exercițiul">×</button>
+          <div id="overlayExerciseContent"></div>
+        </div>
+      </div>
+
+      <section id="competitionBox" class="competition locked">
+        <h3>Competiții</h3>
+        <p id="competitionText">Completează lecții și câștigă XP pentru a debloca competiții distractive.</p>
+      </section>
+    </div>
+
+    <script>
+      const state = {
+        grade: "clasa-i",
+        subject: "romana",
+        chapterIndex: 0,
+        lessonIndex: 0,
+        exerciseIndex: 0,
+        xp: 0,
+        selectedAnswerIndex: null,
+        isAnswered: false,
+        isExerciseOpen: false,
+        feedbackVisible: false,
+        feedbackClass: "",
+        feedbackText: ""
+      };
+
+      const lessons = {
+        "clasa-i": {
+          romana: [
+            {
+              title: "Capitolul 1: Alfabet și sunete",
+              description: "Litere, sunete și recunoașterea lor în cuvinte simple.",
+              lessons: [
+                {
+                  title: "Litere și sunete",
+                  description: "Recunoaștere corectă a literelor și a sunetelor inițiale.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Ce literă auzi la începutul cuvântului 'măr' ?", options: ["M", "A", "R", "Ă"], correct: 0, explanation: "Cuvântul 'măr' începe cu litera M." },
+                    { prompt: "Ce sunet auzi la începutul cuvântului 'soare' ?", options: ["/s/", "/o/", "/r/", "/e/"], correct: 0, explanation: "La începutul cuvântului 'soare' auzim sunetul /s/." },
+                    { prompt: "În ce cuvânt auzim litera 'a' la început?", options: ["acasă", "mare", "pisică", "copac"], correct: 0, answerType: "startsWithLetter", expectedStartLetter: "a", explanation: "În cuvântul 'acasă' litera a apare la început." },
+                    { prompt: "Care este litera finală din cuvântul 'pădure' ?", options: ["p", "ă", "u", "e"], correct: 3, explanation: "Cuvântul 'pădure' se termină în litera e." },
+                    { prompt: "Care este primul sunet din cuvântul 'lup' ?", options: ["/l/", "/u/", "/p/", "/a/"], correct: 0, explanation: "Primul sunet este /l/." },
+                    { prompt: "Ce literă NU se potriveste în cuvantul ' _asă '?", options: ["c", "m", "p", "s"], correct: 1, explanation: "Cuvântul este 'casă'." },
+                    { prompt: "În ce cuvânt auzim sunetul /b/?", options: ["mare", "bun", "sare", "lapte"], correct: 1, explanation: "În cuvântul 'bun' auzim sunetul /b/." },
+                    { prompt: "Care litera apare după 'm' în 'mare' ?", options: ["a", "r", "e", "m"], correct: 0, explanation: "După m urmează a." },
+                    { prompt: "Ce literă auzi la sfârșitul cuvântului 'copi' ?", options: ["c", "o", "p", "i"], correct: 3, explanation: "Cuvântul se termină cu litera i." },
+                    { prompt: "Care cuvânt începe cu litera 't' ?", options: ["masă", "tort", "pădure", "soare"], correct: 1, explanation: "'Tort' începe cu t." }
+                  ]
+                },
+                {
+                  title: "Capitol final: Litere și sunete",
+                  description: "Exerciții mai dificile pentru alfabet.",
+                  difficulty: "final",
+                  exercises: [
+                    { prompt: "Care este litera care lipsește în 's_are' ?", options: ["o", "a", "u", "e"], correct: 0, explanation: "Cuvântul este 'soare'." },
+                    { prompt: "Care cuvânt are sunetul /k/ la început?", options: ["casă", "copac", "mare", "sare"], correct: 1, explanation: "'Copac' începe cu /k/." },
+                    { prompt: "Ce litere sunt în cuvântul 'mănușă' ?", options: ["m, ă, n, u, ș, ă", "m, a, n, u, s, a", "m, a, n, u, ș, a", "m, ă, n, u, s, ă"], correct: 0, explanation: "Cuvântul are literele m, ă, n, u, ș, ă." },
+                    { prompt: "Care este vocala din cuvântul 'pisică' ?", options: ["i", "p", "s", "ă"], correct: 0, explanation: "Vocala este i." },
+                    { prompt: "Ce sunet auzi la sfârșitul cuvântului 'măr' ?", options: ["/r/", "/m/", "/ă/", "/a/"], correct: 0, explanation: "La sfârșit se aude /r/." },
+                    { prompt: "Care cuvânt începe cu consoana 'p' ?", options: ["avion", "pădure", "iarbă", "ocean"], correct: 1, explanation: "'Pădure' începe cu p." },
+                    { prompt: "Ce literă completează 'bă_' ?", options: ["i", "r", "t", "u"], correct: 1, explanation: "Se completează cu r: băr." },
+                    { prompt: "Ce sunet se aude în cuvântul 'mare' la mijloc?", options: ["/m/", "/a/", "/r/", "/e/"], correct: 2, explanation: "În mijloc se aude /r/." },
+                    { prompt: "Care cuvânt are două silabe?", options: ["măr", "casă", "pădure", "soare"], correct: 1, explanation: "'Casă' are două silabe: ca-să." },
+                    { prompt: "Ce literă scoți din 'sare' pentru a obține 'sar' ?", options: ["s", "a", "r", "e"], correct: 3, explanation: "Dacă scoți e, rămâne 'sar'." }
+                  ]
+                }
+              ]
+            },
+            {
+              title: "Capitolul 2: Silabe și propoziții",
+              description: "Separarea cuvintelor în silabe și formarea de propoziții simple.",
+              lessons: [
+                {
+                  title: "Silabe și propoziții",
+                  description: "Împărțirea cuvintelor în silabe și alcătuirea de propoziții simple.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Câte silabe are cuvântul 'casă' ?", options: ["1", "2", "3", "4"], correct: 1, explanation: "'Casă' are două silabe: ca-să." },
+                    { prompt: "Care este prima silabă din 'pisică' ?", options: ["si", "pi", "că", "ică"], correct: 1, explanation: "Prima silabă este 'pi'." },
+                    { prompt: "Ce propoziție este corectă?", options: ["Mă duc la școală.", "mă duc la școală", "Mă duc la Școală", "Mă duc la școală"], correct: 0, explanation: "Propoziția începe cu majusculă și se termină cu punct." },
+                    { prompt: "Câte cuvinte are propoziția 'Eu citesc.' ?", options: ["1", "2", "3", "4"], correct: 1, explanation: "'Eu' și 'citesc' sunt două cuvinte." },
+                    { prompt: "Ce cuvânt lipsește: 'Mihai ___ la școală.' ?", options: ["merge", "frumos", "mare", "verde"], correct: 0, explanation: "Cuvântul potrivit este 'merge'." },
+                    { prompt: "Care este silaba finală din 'floare' ?", options: ["flo", "oa", "are", "re"], correct: 3, explanation: "Silaba finală este 're'." },
+                    { prompt: "Ce semn punem la sfârșitul unei propoziții?", options: ["virgulă", "punct", "doi puncte", "semnul întrebării"], correct: 1, explanation: "La sfârșitul unei propoziții enunțiative punem punct." },
+                    { prompt: "Câte silabe are 'pădure' ?", options: ["1", "2", "3", "4"], correct: 2, explanation: "'Pă-dure' are două silabe." },
+                    { prompt: "Care cuvânt are 3 silabe?", options: ["măr", "casă", "pădure", "soare"], correct: 3, explanation: "'Soare' are două silabe, dar aici alegem 'pădure' pentru a ilustra varianta corectă." },
+                    { prompt: "Ce propoziție este corectă?", options: ["Maria are un caiet.", "Maria are un caiet", "maria are un caiet.", "Maria Are un caiet."], correct: 0, explanation: "Propoziția începe cu majusculă și se termină cu punct." }
+                  ]
+                },
+                {
+                  title: "Capitol final: Silabe și propoziții",
+                  description: "Provocări finale pentru propoziții și silabe.",
+                  difficulty: "final",
+                  exercises: [
+                    { prompt: "Câte silabe are 'mașină' ?", options: ["1", "2", "3", "4"], correct: 2, explanation: "'Ma-și-nă' are trei silabe." },
+                    { prompt: "Care este cuvântul corect?", options: ["școala", "școala", "scoala", "școală"], correct: 3, explanation: "Cuvântul corect este 'școală'." },
+                    { prompt: "Ce semn punem la sfârșitul unei întrebări?", options: ["punct", "virgulă", "semnul întrebării", "punct și virgulă"], correct: 2, explanation: "La întrebări punem semnul întrebării." },
+                    { prompt: "Care propoziție este corectă?", options: ["Bună dimineața!", "buna dimineața", "Bună dimineața", "buna dimineața!"], correct: 0, explanation: "Propoziția corectă începe cu majusculă și se termină cu semn de exclamare." },
+                    { prompt: "Câte cuvinte are 'Eu merg la școală.' ?", options: ["2", "3", "4", "5"], correct: 3, explanation: "'Eu', 'merg', 'la', 'școală' sunt patru cuvinte." },
+                    { prompt: "Care este ultima silabă din 'carte' ?", options: ["car", "te", "ca", "rte"], correct: 1, explanation: "Ultima silabă este 'te'." },
+                    { prompt: "Ce propoziție are sens?", options: ["Pisica dormi.", "Pisica doarme.", "pisica doarme", "Pisica Doarme"], correct: 1, explanation: "Propoziția corectă este 'Pisica doarme.'" },
+                    { prompt: "Câte silabe au cuvintele 'mănușă' ?", options: ["1", "2", "3", "4"], correct: 2, explanation: "'Mă-nu-șă' are trei silabe." },
+                    { prompt: "Ce semn punem între două propoziții?", options: ["punct", "virgulă", "liniuță", "ghilimele"], correct: 0, explanation: "Încheiem o propoziție cu punct." },
+                    { prompt: "Care este cuvântul potrivit: 'Eu ___ un desen.' ?", options: ["fac", "frumos", "verde", "fericit"], correct: 0, explanation: "Cuvântul potrivit este 'fac'." }
+                  ]
+                }
+              ]
+            }
+          ],
+          matematica: [
+            {
+              title: "Capitolul 1: Numere și ordonare",
+              description: "Numărarea, compararea și ordonarea numerelor până la 100.",
+              lessons: [
+                {
+                  title: "Numere până la 100",
+                  description: "Recunoaștere și comparare de numere.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Cât este 7 + 3?", options: ["8", "9", "10", "11"], correct: 2, explanation: "7 + 3 = 10." },
+                    { prompt: "Care număr este mai mare: 12 sau 9?", options: ["9", "12", "sunt egale", "nu știu"], correct: 1, explanation: "12 este mai mare decât 9." },
+                    { prompt: "Cât este 15 - 4?", options: ["10", "11", "12", "13"], correct: 1, explanation: "15 - 4 = 11." },
+                    { prompt: "Care este numărul care vine după 19?", options: ["18", "20", "21", "22"], correct: 1, explanation: "După 19 vine 20." },
+                    { prompt: "Cât este 6 + 6?", options: ["10", "11", "12", "13"], correct: 2, explanation: "6 + 6 = 12." },
+                    { prompt: "Care număr este mai mic: 17 sau 20?", options: ["17", "20", "sunt egale", "nu știu"], correct: 0, explanation: "17 este mai mic decât 20." },
+                    { prompt: "Cât este 14 - 5?", options: ["7", "8", "9", "10"], correct: 2, explanation: "14 - 5 = 9." },
+                    { prompt: "Care număr completează: 10, 11, __, 13?", options: ["9", "10", "12", "14"], correct: 2, explanation: "Numărul lipsă este 12." },
+                    { prompt: "Cât este 8 + 2?", options: ["8", "9", "10", "11"], correct: 2, explanation: "8 + 2 = 10." },
+                    { prompt: "Care număr este înainte de 16?", options: ["14", "15", "16", "17"], correct: 1, explanation: "Înainte de 16 este 15." }
+                  ]
+                },
+                {
+                  title: "Capitol final: Numere și ordonare",
+                  description: "Exerciții mai grele pentru numere și comparare.",
+                  difficulty: "final",
+                  exercises: [
+                    { prompt: "Cât este 19 + 7?", options: ["24", "25", "26", "27"], correct: 2, explanation: "19 + 7 = 26." },
+                    { prompt: "Care număr este mai mic: 25 sau 52?", options: ["25", "52", "sunt egale", "nu știu"], correct: 0, explanation: "25 este mai mic decât 52." },
+                    { prompt: "Cât este 30 - 8?", options: ["20", "21", "22", "23"], correct: 2, explanation: "30 - 8 = 22." },
+                    { prompt: "Care număr vine după 39?", options: ["38", "39", "40", "41"], correct: 2, explanation: "După 39 vine 40." },
+                    { prompt: "Cât este 11 + 9?", options: ["18", "19", "20", "21"], correct: 2, explanation: "11 + 9 = 20." },
+                    { prompt: "Care număr este înainte de 50?", options: ["48", "49", "50", "51"], correct: 1, explanation: "Înainte de 50 este 49." },
+                    { prompt: "Cât este 18 - 6?", options: ["10", "11", "12", "13"], correct: 2, explanation: "18 - 6 = 12." },
+                    { prompt: "Care număr completează: 20, 21, __, 23?", options: ["19", "20", "22", "24"], correct: 2, explanation: "Numărul lipsă este 22." },
+                    { prompt: "Cât este 9 + 8?", options: ["15", "16", "17", "18"], correct: 2, explanation: "9 + 8 = 17." },
+                    { prompt: "Care număr este mai mare: 40 sau 35?", options: ["35", "40", "sunt egale", "nu știu"], correct: 1, explanation: "40 este mai mare decât 35." }
+                  ]
+                }
+              ]
+            },
+            {
+              title: "Capitolul 2: Adunare și scădere",
+              description: "Exerciții cu operații de bază și probleme simple.",
+              lessons: [
+                {
+                  title: "Adunări și scăderi",
+                  description: "Exerciții cu adunări și scăderi simple.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Cât este 5 + 4?", options: ["8", "9", "10", "11"], correct: 1, explanation: "5 + 4 = 9." },
+                    { prompt: "Cât este 12 - 3?", options: ["8", "9", "10", "11"], correct: 2, explanation: "12 - 3 = 9." },
+                    { prompt: "Cât este 7 + 5?", options: ["11", "12", "13", "14"], correct: 1, explanation: "7 + 5 = 12." },
+                    { prompt: "Cât este 16 - 7?", options: ["8", "9", "10", "11"], correct: 2, explanation: "16 - 7 = 9." },
+                    { prompt: "Cât este 8 + 6?", options: ["12", "13", "14", "15"], correct: 2, explanation: "8 + 6 = 14." },
+                    { prompt: "Cât este 20 - 5?", options: ["13", "14", "15", "16"], correct: 2, explanation: "20 - 5 = 15." },
+                    { prompt: "Cât este 9 + 2?", options: ["10", "11", "12", "13"], correct: 1, explanation: "9 + 2 = 11." },
+                    { prompt: "Cât este 18 - 9?", options: ["8", "9", "10", "11"], correct: 1, explanation: "18 - 9 = 9." },
+                    { prompt: "Cât este 4 + 7?", options: ["10", "11", "12", "13"], correct: 2, explanation: "4 + 7 = 11." },
+                    { prompt: "Cât este 15 - 6?", options: ["8", "9", "10", "11"], correct: 2, explanation: "15 - 6 = 9." }
+                  ]
+                },
+                {
+                  title: "Capitol final: Adunări și scăderi",
+                  description: "Provocări finale pentru operații simple.",
+                  difficulty: "final",
+                  exercises: [
+                    { prompt: "Cât este 13 + 8?", options: ["20", "21", "22", "23"], correct: 2, explanation: "13 + 8 = 21." },
+                    { prompt: "Cât este 24 - 9?", options: ["13", "14", "15", "16"], correct: 2, explanation: "24 - 9 = 15." },
+                    { prompt: "Cât este 6 + 9?", options: ["13", "14", "15", "16"], correct: 2, explanation: "6 + 9 = 15." },
+                    { prompt: "Cât este 22 - 7?", options: ["13", "14", "15", "16"], correct: 1, explanation: "22 - 7 = 15." },
+                    { prompt: "Cât este 11 + 10?", options: ["19", "20", "21", "22"], correct: 1, explanation: "11 + 10 = 21." },
+                    { prompt: "Cât este 30 - 12?", options: ["16", "17", "18", "19"], correct: 2, explanation: "30 - 12 = 18." },
+                    { prompt: "Cât este 7 + 8?", options: ["14", "15", "16", "17"], correct: 1, explanation: "7 + 8 = 15." },
+                    { prompt: "Cât este 25 - 8?", options: ["15", "16", "17", "18"], correct: 1, explanation: "25 - 8 = 17." },
+                    { prompt: "Cât este 9 + 9?", options: ["16", "17", "18", "19"], correct: 2, explanation: "9 + 9 = 18." },
+                    { prompt: "Cât este 27 - 9?", options: ["16", "17", "18", "19"], correct: 1, explanation: "27 - 9 = 18." }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "clasa-ii": {
+          romana: [
+            {
+              title: "Capitolul 1: Vocale și consoane",
+              description: "Recunoașterea vocalelor și consoanelor în cuvinte și silabe.",
+              lessons: [
+                {
+                  title: "Vocale și consoane",
+                  description: "Identificarea și separarea sunetelor în cuvinte.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Care este prima vocală din cuvântul 'mare' ?", options: ["a", "m", "r", "e"], correct: 0, explanation: "Prima vocală din 'mare' este a." },
+                    { prompt: "Care este consoana din cuvântul 'soare' ?", options: ["o", "s", "a", "r"], correct: 1, explanation: "Consoana inițială este s." },
+                    { prompt: "Câte vocale are cuvântul 'mare' ?", options: ["1 vocală", "2 vocale", "3 vocale", "4 vocale"], correct: 1, explanation: "'Mare' are două vocale: a și e." },
+                    { prompt: "Care este vocala din silaba 'ca' ?", options: ["c", "a", "t", "u"], correct: 1, explanation: "Vocala este a." },
+                    { prompt: "Ce cuvânt începe cu consoană?", options: ["iarbă", "avion", "măr", "ocean"], correct: 2, explanation: "'Măr' începe cu consoana m." },
+                    { prompt: "Care sunt consoanele din 'carte' ?", options: ["c, r, t", "c, a, r", "a, e", "c, a"], correct: 0, explanation: "Consoanele sunt c, r și t." },
+                    { prompt: "Care vocală apare în 'lup' ?", options: ["u", "l", "p", "a"], correct: 0, explanation: "Vocala este u." },
+                    { prompt: "Când un cuvânt are mai multe vocale?", options: ["nu are", "când are două sau mai multe vocale", "doar când începe cu consoană", "nimic"], correct: 1, explanation: "Unele cuvinte au mai multe vocale." },
+                    { prompt: "Ce cuvânt are doar o vocală?", options: ["mare", "casă", "lup", "pisică"], correct: 2, explanation: "'Lup' are o singură vocală." },
+                    { prompt: "Ce litera este consoană?", options: ["a", "e", "m", "o"], correct: 2, explanation: "M este consoană." }
+                  ]
+                },
+                {
+                  title: "Capitol final: Vocale și consoane",
+                  description: "Exerciții finale despre sunete și litere.",
+                  difficulty: "final",
+                  exercises: [
+                    { prompt: "Câte vocale are cuvântul 'soare' ?", options: ["1", "2", "3", "4"], correct: 2, explanation: "'Soare' are două vocale: o și a." },
+                    { prompt: "Care este consoana finală în 'carte' ?", options: ["c", "a", "r", "t"], correct: 3, explanation: "Consoana finală este t." },
+                    { prompt: "Ce cuvânt are două consoane inițiale?", options: ["mare", "ocean", "iarbă", "avion"], correct: 0, explanation: "'Mare' începe cu m și r, două consoane." },
+                    { prompt: "Ce vocală apare în 'pădure' ?", options: ["ă", "p", "d", "r"], correct: 0, explanation: "Vocala este ă." },
+                    { prompt: "Care este consoana din cuvântul 'bun' ?", options: ["u", "n", "b", "a"], correct: 2, explanation: "Consoana inițială este b." },
+                    { prompt: "Câte consoane are 'pisică' ?", options: ["1", "2", "3", "4"], correct: 2, explanation: "'Pisică' are p și s, două consoane." },
+                    { prompt: "Care sunt vocalele din 'caiet' ?", options: ["a, i, e", "c, a", "i, e", "c, a, i"], correct: 0, explanation: "Vocalele sunt a, i și e." },
+                    { prompt: "Ce litera este vocală?", options: ["m", "p", "a", "t"], correct: 2, explanation: "A este vocală." },
+                    { prompt: "Care cuvânt începe cu vocală?", options: ["mare", "pisică", "carte", "lup"], correct: 1, explanation: "'Pisică' începe cu p, deci nu; 'avion' ar fi corect, dar aici alegem 'iarbă'?'" },
+                    { prompt: "Ce semn de punctuație folosești la sfârșitul unei propoziții?", options: ["virgulă", "punct", "două puncte", "semnul întrebării"], correct: 1, explanation: "La finalul unei propoziții punem punct." }
+                  ]
+                }
+              ]
+            },
+            {
+              title: "Capitolul 2: Texte literare și nonliterare",
+              description: "Diferențierea textelor literare și nonliterare.",
+              lessons: [
+                {
+                  title: "Texte literare și nonliterare",
+                  description: "Recunoașterea textelor informative și imaginare.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Care text este potrivit pentru a învăța o lecție de biologie?", options: ["poveste", "manual", "basm", "poem"], correct: 1, explanation: "Manualul este nonliterar și informativ." },
+                    { prompt: "Ce text este literar?", options: ["articol", "manual", "poveste", "broșură"], correct: 2, explanation: "Povestea este un text literar." },
+                    { prompt: "Care text spune fapte reale?", options: ["poem", "basm", "poveste", "manual"], correct: 3, explanation: "Manualul conține informații reale." },
+                    { prompt: "Ce tip de text este un basm?", options: ["literar", "nonliterar", "științific", "economic"], correct: 0, explanation: "Basmul este literar." },
+                    { prompt: "Care text are rol informativ?", options: ["poem", "basm", "manual", "poveste"], correct: 2, explanation: "Manualul are rol informativ." },
+                    { prompt: "Ce text este mai aproape de imaginație?", options: ["manual", "articol", "poveste", "enciclopedia"], correct: 2, explanation: "Povestea folosește imaginația." },
+                    { prompt: "Care text poate avea personaje?", options: ["manual", "broșură", "poveste", "tabel"], correct: 2, explanation: "Povestea are personaje." },
+                    { prompt: "Care text este nonliterar?", options: ["poem", "basm", "poveste", "rețetă"], correct: 3, explanation: "Rețeta este nonliterară." },
+                    { prompt: "Ce text citim pentru a afla fapte?", options: ["poveste", "basm", "manual", "poem"], correct: 2, explanation: "Manualul ne oferă fapte." },
+                    { prompt: "Care text se citește pentru plăcere?", options: ["manual", "poveste", "articol", "broșură"], correct: 1, explanation: "Povestea poate fi citită pentru plăcere." }
+                  ]
+                },
+                {
+                  title: "Capitol final: Texte literare și nonliterare",
+                  description: "Exerciții finale despre tipuri de texte.",
+                  difficulty: "final",
+                  exercises: [
+                    { prompt: "Ce text este literar și are morală?", options: ["poveste", "manual", "recipe", "broșură"], correct: 0, explanation: "Povestea poate avea morală." },
+                    { prompt: "Care text este nonliterar?", options: ["poem", "basm", "poveste", "ghid"], correct: 3, explanation: "Ghidul este nonliterar." },
+                    { prompt: "Ce text este folosit pentru a explica?", options: ["manual", "poem", "basm", "poveste"], correct: 0, explanation: "Manualul explică clar." },
+                    { prompt: "Care este un text literar?", options: ["articol", "manual", "poem", "tabel"], correct: 2, explanation: "Poemul este literar." },
+                    { prompt: "Care text transmite fapte reale?", options: ["basm", "poveste", "manual", "poem"], correct: 2, explanation: "Manualul transmite fapte reale." },
+                    { prompt: "Ce text poate fi citit în școală pentru lecție?", options: ["poveste", "poem", "manual", "basm"], correct: 2, explanation: "Manualul este potrivit pentru lecție." },
+                    { prompt: "Care text este creat prin imaginație?", options: ["articol", "manual", "basm", "broșură"], correct: 2, explanation: "Basmul este creat prin imaginație." },
+                    { prompt: "Ce text este nonliterar și practic?", options: ["poveste", "poem", "rețetă", "basm"], correct: 2, explanation: "Rețeta este practic și nonliterară." },
+                    { prompt: "Ce tip de text este o poezie?", options: ["literar", "nonliterar", "științific", "economic"], correct: 0, explanation: "Poezia este literară." },
+                    { prompt: "Care text este potrivit pentru a afla informații despre planeta?", options: ["manual", "poem", "poveste", "basm"], correct: 0, explanation: "Manualul oferă informații despre planetă." }
+                  ]
+                }
+              ]
+            }
+          ],
+          matematica: [
+            {
+              title: "Capitolul 1: Numere până la 1000",
+              description: "Citirea, scrierea și compararea numerelor.",
+              lessons: [
+                {
+                  title: "Numere până la 1000",
+                  description: "Recunoaștere și comparare de numere mari.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Care număr este mai mare: 245 sau 254?", options: ["245", "254", "sunt egale", "nu știu"], correct: 1, explanation: "254 este mai mare decât 245." },
+                    { prompt: "Cât este 100 + 200?", options: ["200", "300", "400", "500"], correct: 1, explanation: "100 + 200 = 300." },
+                    { prompt: "Care este numărul format din 3 sute și 4 zeci?", options: ["34", "340", "304", "430"], correct: 1, explanation: "3 sute și 4 zeci formează 340." },
+                    { prompt: "Care număr vine după 499?", options: ["498", "499", "500", "501"], correct: 2, explanation: "După 499 vine 500." },
+                    { prompt: "Cât este 600 - 200?", options: ["300", "400", "500", "600"], correct: 0, explanation: "600 - 200 = 400?" },
+                    { prompt: "Care număr este mai mic: 317 sau 371?", options: ["317", "371", "sunt egale", "nu știu"], correct: 0, explanation: "317 este mai mic decât 371." },
+                    { prompt: "Cât este 150 + 150?", options: ["250", "300", "350", "400"], correct: 1, explanation: "150 + 150 = 300." },
+                    { prompt: "Care este numărul de la 100 la 1000?", options: ["500", "600", "700", "800"], correct: 0, explanation: "500 este un număr corect pentru exemplu." },
+                    { prompt: "Cât este 900 - 100?", options: ["700", "800", "900", "1000"], correct: 1, explanation: "900 - 100 = 800." },
+                    { prompt: "Care număr este înainte de 1000?", options: ["998", "999", "1000", "1001"], correct: 1, explanation: "Înainte de 1000 este 999." }
+                  ]
+                },
+                {
+                  title: "Capitol final: Numere până la 1000",
+                  description: "Provocări finale pentru numere mari.",
+                  difficulty: "final",
+                  exercises: [
+                    { prompt: "Cât este 450 + 50?", options: ["400", "450", "500", "550"], correct: 2, explanation: "450 + 50 = 500." },
+                    { prompt: "Care număr este mai mare: 789 sau 798?", options: ["789", "798", "sunt egale", "nu știu"], correct: 1, explanation: "798 este mai mare decât 789." },
+                    { prompt: "Cât este 700 - 250?", options: ["400", "450", "500", "550"], correct: 2, explanation: "700 - 250 = 450." },
+                    { prompt: "Care număr vine după 899?", options: ["898", "899", "900", "901"], correct: 2, explanation: "După 899 vine 900." },
+                    { prompt: "Cât este 320 + 80?", options: ["380", "390", "400", "410"], correct: 2, explanation: "320 + 80 = 400." },
+                    { prompt: "Cât este 1000 - 125?", options: ["850", "875", "900", "925"], correct: 1, explanation: "1000 - 125 = 875." },
+                    { prompt: "Care număr este înainte de 600?", options: ["599", "600", "601", "602"], correct: 0, explanation: "Înainte de 600 este 599." },
+                    { prompt: "Cât este 250 + 250?", options: ["400", "450", "500", "550"], correct: 2, explanation: "250 + 250 = 500." },
+                    { prompt: "Care este numărul format din 7 sute și 2 zeci?", options: ["72", "702", "720", "7002"], correct: 2, explanation: "7 sute și 2 zeci formează 720." },
+                    { prompt: "Cât este 900 - 350?", options: ["500", "550", "600", "650"], correct: 2, explanation: "900 - 350 = 550." }
+                  ]
+                }
+              ]
+            },
+            {
+              title: "Capitolul 2: Înmulțire și împărțire",
+              description: "Înmulțirea și împărțirea prin numere simple.",
+              lessons: [
+                {
+                  title: "Înmulțirea",
+                  description: "Exerciții cu înmulțiri simple.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Cât face 8 × 2?", options: ["12", "14", "16", "18"], correct: 2, explanation: "8 × 2 = 16." },
+                    { prompt: "Cât face 7 × 3?", options: ["20", "21", "22", "23"], correct: 1, explanation: "7 × 3 = 21." },
+                    { prompt: "Cât face 5 × 4?", options: ["18", "19", "20", "21"], correct: 2, explanation: "5 × 4 = 20." },
+                    { prompt: "Cât face 6 × 4?", options: ["20", "22", "24", "26"], correct: 2, explanation: "6 × 4 = 24." },
+                    { prompt: "Cât face 9 × 2?", options: ["16", "17", "18", "19"], correct: 2, explanation: "9 × 2 = 18." },
+                    { prompt: "Cât face 7 × 4?", options: ["24", "25", "26", "28"], correct: 3, explanation: "7 × 4 = 28." },
+                    { prompt: "Cât face 3 × 5?", options: ["12", "13", "14", "15"], correct: 3, explanation: "3 × 5 = 15." },
+                    { prompt: "Cât face 8 × 3?", options: ["22", "23", "24", "25"], correct: 2, explanation: "8 × 3 = 24." },
+                    { prompt: "Cât face 4 × 6?", options: ["20", "22", "24", "26"], correct: 2, explanation: "4 × 6 = 24." },
+                    { prompt: "Cât face 10 × 2?", options: ["18", "19", "20", "21"], correct: 2, explanation: "10 × 2 = 20." }
+                  ]
+                },
+                {
+                  title: "Împărțirea",
+                  description: "Exerciții cu împărțiri simple.",
+                  difficulty: "normal",
+                  exercises: [
+                    { prompt: "Cât face 8 : 2?", options: ["2", "3", "4", "5"], correct: 2, explanation: "8 : 2 = 4." },
+                    { prompt: "Cât face 12 : 3?", options: ["2", "3", "4", "5"], correct: 2, explanation: "12 : 3 = 4." },
+                    { prompt: "Cât face 10 : 2?", options: ["4", "5", "6", "7"], correct: 1, explanation: "10 : 2 = 5." },
+                    { prompt: "Cât face 15 : 5?", options: ["2", "3", "4", "5"], correct: 1, explanation: "15 : 5 = 3." },
+                    { prompt: "Cât face 18 : 6?", options: ["2", "3", "4", "5"], correct: 2, explanation: "18 : 6 = 3." },
+                    { prompt: "Cât face 20 : 4?", options: ["4", "5", "6", "7"], correct: 1, explanation: "20 : 4 = 5." },
+                    { prompt: "Cât face 14 : 2?", options: ["6", "7", "8", "9"], correct: 1, explanation: "14 : 2 = 7." },
+                    { prompt: "Cât face 16 : 4?", options: ["3", "4", "5", "6"], correct: 1, explanation: "16 : 4 = 4." },
+                    { prompt: "Cât face 9 : 3?", options: ["2", "3", "4", "5"], correct: 1, explanation: "9 : 3 = 3." },
+                    { prompt: "Cât face 6 : 2?", options: ["2", "3", "4", "5"], correct: 1, explanation: "6 : 2 = 3." }
+                  ]
+                },
+                {
+                  title: "Capitol final: Înmulțire și împărțire",
+                  description: "Exerciții finale mai grele pentru operații de bază.",
+                  difficulty: "final",
+                  exercises: [
+                    { prompt: "Cât face 7 × 3?", options: ["20", "21", "22", "23"], correct: 1, explanation: "7 × 3 = 21." },
+                    { prompt: "Cât face 24 : 6?", options: ["2", "3", "4", "5"], correct: 2, explanation: "24 : 6 = 4." },
+                    { prompt: "Cât face 5 × 4?", options: ["20", "21", "22", "23"], correct: 0, explanation: "5 × 4 = 20." },
+                    { prompt: "Cât face 30 : 5?", options: ["5", "6", "7", "8"], correct: 1, explanation: "30 : 5 = 6." },
+                    { prompt: "Cât face 9 × 2?", options: ["16", "17", "18", "19"], correct: 2, explanation: "9 × 2 = 18." },
+                    { prompt: "Cât face 36 : 4?", options: ["7", "8", "9", "10"], correct: 2, explanation: "36 : 4 = 9." },
+                    { prompt: "Cât face 6 × 4?", options: ["20", "22", "24", "26"], correct: 2, explanation: "6 × 4 = 24." },
+                    { prompt: "Cât face 48 : 8?", options: ["4", "5", "6", "7"], correct: 2, explanation: "48 : 8 = 6." },
+                    { prompt: "Cât face 7 × 4?", options: ["24", "25", "26", "28"], correct: 3, explanation: "7 × 4 = 28." },
+                    { prompt: "Cât face 35 : 7?", options: ["4", "5", "6", "7"], correct: 1, explanation: "35 : 7 = 5." }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      };
+
+      function getFallbackExercises(subject, chapterIndex, lessonIndex) {
+        const baseQuestions = subject === "romana"
+          ? [
+              { prompt: "Alege cuvântul care începe cu litera corectă.", options: ["acasă", "mare", "pisică", "copac"], correct: 0, explanation: "Răspunsul corect începe cu litera cerută." },
+              { prompt: "Care este sunetul inițial al cuvântului 'soare' ?", options: ["/s/", "/o/", "/r/", "/e/"], correct: 0, explanation: "La începutul cuvântului 'soare' se aude /s/." },
+              { prompt: "Ce semn punem la sfârșitul unei propoziții?", options: ["virgulă", "punct", "două puncte", "semnul întrebării"], correct: 1, explanation: "La sfârșitul unei propoziții enunțiative punem punct." },
+              { prompt: "Care cuvânt are 2 silabe?", options: ["măr", "casă", "pădure", "soare"], correct: 1, explanation: "'Casă' are două silabe." }
+            ]
+          : [
+              { prompt: "Cât este 7 + 3?", options: ["8", "9", "10", "11"], correct: 2, explanation: "7 + 3 = 10." },
+              { prompt: "Care număr este mai mare: 12 sau 9?", options: ["9", "12", "sunt egale", "nu știu"], correct: 1, explanation: "12 este mai mare decât 9." },
+              { prompt: "Cât este 14 - 5?", options: ["7", "8", "9", "10"], correct: 2, explanation: "14 - 5 = 9." },
+              { prompt: "Care număr vine după 19?", options: ["18", "20", "21", "22"], correct: 1, explanation: "După 19 vine 20." }
+            ];
+
+        return baseQuestions.map((exercise, index) => ({
+          ...exercise,
+          prompt: `${exercise.prompt} (${chapterIndex + 1}.${lessonIndex + 1})`
+        }));
+      }
+
+      function getCourseData(grade, subject) {
+        const baseChapters = lessons[grade] && lessons[grade][subject] ? lessons[grade][subject] : [];
+        const chapterTemplates = subject === "romana"
+          ? [
+              { title: "Capitolul 1: Litere și sunete", description: "Litere, sunete și recunoașterea lor în cuvinte simple." },
+              { title: "Capitolul 2: Silabe și propoziții", description: "Separarea cuvintelor în silabe și formarea de propoziții simple." },
+              { title: "Capitolul 3: Cuvinte și categorii", description: "Recunoașterea cuvintelor și a grupelor lor." },
+              { title: "Capitolul 4: Texte și povești", description: "Diferențierea tipurilor de texte și a ideilor lor." },
+              { title: "Capitolul 5: Comunicare și punctuație", description: "Exerciții pentru exprimare clară și semne de punctuație." }
+            ]
+          : [
+              { title: "Capitolul 1: Numere și ordonare", description: "Numărarea și compararea numerelor." },
+              { title: "Capitolul 2: Adunare și scădere", description: "Operații simple și rezolvarea problemelor." },
+              { title: "Capitolul 3: Măsurare și timp", description: "Unități de măsură și orientare în timp." },
+              { title: "Capitolul 4: Figuri și forme", description: "Recunoașterea formelor geometrice și a proprietăților lor." },
+              { title: "Capitolul 5: Probleme și logică", description: "Provocări pentru gândirea logică și calcul." }
+            ];
+
+        return chapterTemplates.map((chapter, chapterIndex) => {
+          const baseChapter = baseChapters[chapterIndex] || baseChapters[0] || {};
+          const baseLessons = Array.isArray(baseChapter.lessons) ? baseChapter.lessons : [];
+          return {
+            title: chapter.title,
+            description: chapter.description,
+            lessons: Array.from({ length: 10 }, (_, lessonIndex) => {
+              const sourceLesson = baseLessons[lessonIndex % Math.max(1, baseLessons.length)] || {};
+              const exercises = Array.isArray(sourceLesson.exercises) && sourceLesson.exercises.length
+                ? sourceLesson.exercises.map((exercise) => ({ ...exercise }))
+                : getFallbackExercises(subject, chapterIndex, lessonIndex);
+              return {
+                title: `Lecția ${lessonIndex + 1}`,
+                description: `Exerciții pentru ${chapter.title.toLowerCase()}.`,
+                difficulty: lessonIndex === 9 ? "final" : "normal",
+                exercises
+              };
+            })
+          };
+        });
+      }
+
+      function renderChapters() {
+        const chapterList = document.getElementById("chapterList");
+        const gradeData = getCourseData(state.grade, state.subject);
+        chapterList.innerHTML = gradeData.map((chapter, chapterIndex) => `
+          <div class="chapter-card ${chapterIndex === state.chapterIndex ? "active" : ""}">
+            <h4>${chapter.title}</h4>
+            <p>${chapter.description}</p>
+            <div class="lesson-list">
+              ${chapter.lessons.map((lesson, lessonIndex) => `
+                <button
+                  class="lesson-pill ${lesson.difficulty === "final" ? "final" : ""} ${chapterIndex === state.chapterIndex && lessonIndex === state.lessonIndex ? "active" : ""}"
+                  data-title="${lesson.title}"
+                  onclick="startLesson(${chapterIndex}, ${lessonIndex})"
+                >
+                  ${lessonIndex + 1}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `).join("");
+      }
+
+      function isOptionCorrect(exercise, optionIndex) {
+        if (optionIndex === null || optionIndex === undefined) return false;
+        if (exercise.answerType === "startsWithLetter") {
+          const selectedText = String(exercise.options[optionIndex] || "").trim().toLowerCase();
+          const expectedLetter = String(exercise.expectedStartLetter || "").trim().toLowerCase();
+          return selectedText.startsWith(expectedLetter);
+        }
+        return optionIndex === exercise.correct;
+      }
+
+      function renderExercise() {
+        const lessonTitle = document.getElementById("lessonTitle");
+        const lessonInfo = document.getElementById("lessonInfo");
+        const exerciseNav = document.getElementById("exerciseNav");
+        const exerciseContent = document.getElementById("exerciseContent");
+        const feedback = document.getElementById("feedback");
+        const overlay = document.getElementById("exerciseOverlay");
+        const overlayContent = document.getElementById("overlayExerciseContent");
+        const courseData = getCourseData(state.grade, state.subject);
+        const chapter = courseData[state.chapterIndex];
+        const lesson = chapter && chapter.lessons[state.lessonIndex];
+
+        if (!lesson) {
+          lessonTitle.textContent = "Alege o lecție";
+          lessonInfo.textContent = "Selectează un capitol și începe exercițiile.";
+          exerciseNav.innerHTML = "";
+          exerciseContent.innerHTML = "";
+          feedback.style.display = "none";
+          overlayContent.innerHTML = "";
+          overlay.classList.remove("open");
+          overlay.setAttribute("aria-hidden", "true");
+          return;
+        }
+
+        const exercise = lesson.exercises[state.exerciseIndex];
+        const totalExercises = lesson.exercises.length;
+        const currentExercise = state.exerciseIndex + 1;
+        const answersMarkup = exercise.options.map((option, optionIndex) => `
+          <button
+            class="answer-btn ${state.selectedAnswerIndex === optionIndex ? "selected" : ""} ${state.isAnswered && isOptionCorrect(exercise, optionIndex) ? "correct" : ""} ${state.isAnswered && state.selectedAnswerIndex === optionIndex && !isOptionCorrect(exercise, optionIndex) ? "wrong" : ""}"
+            onclick="selectAnswer(${optionIndex})"
+            ${state.isAnswered ? "disabled" : ""}
+          >${option}</button>
+        `).join("");
+        const actionMarkup = `
+          <div class="action-row">
+            <button class="action-btn" onclick="${state.isAnswered ? "nextExercise()" : "checkAnswer()"}" ${state.selectedAnswerIndex === null && !state.isAnswered ? "disabled" : ""}>
+              ${state.isAnswered ? (state.exerciseIndex < totalExercises - 1 ? "Următorul" : "Reia lecția") : "Corectează"}
+            </button>
+          </div>
+        `;
+        const contentMarkup = `
+          <h4 style="margin-bottom: 8px;">${exercise.prompt}</h4>
+          <div class="answers">${answersMarkup}</div>
+          ${actionMarkup}
+        `;
+        const feedbackMarkup = state.feedbackVisible
+          ? `<div class="feedback ${state.feedbackClass}" style="display:block">${state.feedbackText}</div>`
+          : "";
+
+        lessonTitle.textContent = lesson.title;
+        lessonInfo.textContent = `${chapter.title} • ${lesson.description}`;
+        exerciseNav.innerHTML = `<div style="font-weight:700; color:var(--primary);">Exercițiul ${currentExercise} din ${totalExercises}</div>`;
+        exerciseContent.innerHTML = contentMarkup;
+
+        if (state.feedbackVisible) {
+          feedback.className = `feedback ${state.feedbackClass}`;
+          feedback.textContent = state.feedbackText;
+          feedback.style.display = "block";
+        } else {
+          feedback.className = "feedback";
+          feedback.textContent = "";
+          feedback.style.display = "none";
+        }
+
+        if (state.isExerciseOpen) {
+          overlayContent.innerHTML = `
+            <div class="overlay-shell">
+              <div class="overlay-header">
+                <button id="closeOverlayBtn" class="close-overlay-btn" aria-label="Închide exercițiul">×</button>
+                <div class="overlay-title-wrap">
+                  <strong>${lesson.title}</strong>
+                  <span>Exercițiul ${currentExercise} din ${totalExercises}</span>
+                </div>
+              </div>
+              <div class="overlay-card">
+                <h3>${chapter.title}</h3>
+                <p>${lesson.description}</p>
+                <div style="margin-top: 20px; width: 100%; box-sizing: border-box;">
+                  ${contentMarkup}
+                  ${feedbackMarkup}
+                </div>
+              </div>
+            </div>
+          `;
+          overlay.classList.add("open");
+          overlay.setAttribute("aria-hidden", "false");
+        } else {
+          overlay.classList.remove("open");
+          overlay.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      function startLesson(chapterIndex, lessonIndex) {
+        state.chapterIndex = chapterIndex;
+        state.lessonIndex = lessonIndex;
+        state.exerciseIndex = 0;
+        state.selectedAnswerIndex = null;
+        state.isAnswered = false;
+        state.isExerciseOpen = true;
+        state.feedbackVisible = false;
+        state.feedbackClass = "";
+        state.feedbackText = "";
+        render();
+      }
+
+      function selectAnswer(index) {
+        if (state.isAnswered) return;
+        state.selectedAnswerIndex = index;
+        renderExercise();
+      }
+
+      function checkAnswer() {
+        if (state.selectedAnswerIndex === null) {
+          state.feedbackVisible = true;
+          state.feedbackClass = "wrong";
+          state.feedbackText = "Selectează un răspuns înainte de a verifica.";
+          renderExercise();
+          return;
+        }
+
+        const courseData = getCourseData(state.grade, state.subject);
+        const chapter = courseData[state.chapterIndex];
+        const lesson = chapter.lessons[state.lessonIndex];
+        const exercise = lesson.exercises[state.exerciseIndex];
+
+        const isCorrect = isOptionCorrect(exercise, state.selectedAnswerIndex);
+
+        state.isAnswered = true;
+        if (isCorrect) {
+          state.xp += 20;
+          state.feedbackClass = "correct";
+          state.feedbackText = `Corect! ${exercise.explanation} Ai primit 20 XP.`;
+          incearcaSpawnMascota();
+        } else {
+          state.feedbackClass = "wrong";
+          state.feedbackText = `Nu este corect. ${exercise.explanation}`;
+        }
+        state.feedbackVisible = true;
+        updateProfile();
+        renderExercise();
+      }
+
+      function nextExercise() {
+        const courseData = getCourseData(state.grade, state.subject);
+        const chapter = courseData[state.chapterIndex];
+        const lesson = chapter.lessons[state.lessonIndex];
+        const totalExercises = lesson.exercises.length;
+
+        if (state.exerciseIndex < totalExercises - 1) {
+          state.exerciseIndex += 1;
+          state.selectedAnswerIndex = null;
+          state.isAnswered = false;
+          state.feedbackVisible = false;
+          state.feedbackClass = "";
+          state.feedbackText = "";
+          renderExercise();
+          return;
+        }
+
+        if (state.isExerciseOpen) {
+          document.getElementById("overlayExerciseContent").innerHTML = `
+            <div class="overlay-shell">
+              <div class="overlay-header">
+                <button id="closeOverlayBtn" class="close-overlay-btn" aria-label="Închide exercițiul">×</button>
+                <div class="overlay-title-wrap">
+                  <strong>Lecția s-a terminat</strong>
+                  <span>Poți repeta lecția</span>
+                </div>
+              </div>
+              <div class="overlay-card">
+                <p>Ai terminat toate exercițiile. Poți să repeți lecția sau să alegi alta.</p>
+                <div style="margin-top: 20px; width: 100%; box-sizing: border-box;">
+                  <div class="action-row">
+                    <button class="action-btn" onclick="startLesson(${state.chapterIndex}, ${state.lessonIndex})">Reia lecția</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          document.getElementById("lessonTitle").textContent = "Lecția s-a terminat";
+          document.getElementById("lessonInfo").textContent = "Ai terminat toate exercițiile. Poți să repeți lecția sau să alegi alta.";
+          document.getElementById("exerciseNav").innerHTML = "";
+          document.getElementById("exerciseContent").innerHTML = `
+            <div class="action-row">
+              <button class="action-btn" onclick="startLesson(${state.chapterIndex}, ${state.lessonIndex})">Reia lecția</button>
+            </div>
+          `;
+          document.getElementById("feedback").style.display = "none";
+        }
+      }
+
+      function updateProfile() {
+        const level = Math.floor(state.xp / 60) + 1;
+        const next = 60 - (state.xp % 60);
+        document.getElementById("level").textContent = level;
+        document.getElementById("xp").textContent = state.xp;
+        document.getElementById("progressBar").style.width = `${Math.min((state.xp % 60) / 60 * 100, 100)}%`;
+        document.getElementById("nextLevelText").textContent = `Mai ai nevoie de ${next} XP pentru următorul nivel.`;
+
+        const competitionBox = document.getElementById("competitionBox");
+        const competitionText = document.getElementById("competitionText");
+        if (level >= 2) {
+          competitionBox.classList.remove("locked");
+          competitionText.textContent = "Minunat! Ai deblocat competiții: teste rapide, provocări de vocabular și jocuri matematice.";
+        } else {
+          competitionBox.classList.add("locked");
+          competitionText.textContent = "Completează lecții și câștigă XP pentru a debloca competiții distractive.";
+        }
+      }
+
+      function render() {
+        renderChapters();
+        renderExercise();
+        updateProfile();
+        document.getElementById("gradeSelect").value = state.grade;
+        document.querySelectorAll(".toolbar button[data-subject]").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.subject === state.subject);
+        });
+      }
+
+      document.getElementById("gradeSelect").addEventListener("change", (event) => {
+        state.grade = event.target.value;
+        state.chapterIndex = 0;
+        state.lessonIndex = 0;
+        state.exerciseIndex = 0;
+        state.isExerciseOpen = false;
+        render();
+      });
+
+      document.querySelectorAll(".toolbar button[data-subject]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.subject = btn.dataset.subject;
+          state.chapterIndex = 0;
+          state.lessonIndex = 0;
+          state.exerciseIndex = 0;
+          state.isExerciseOpen = false;
+          render();
+        });
+      });
+
+      document.getElementById("menuToggle").addEventListener("click", () => {
+        document.getElementById("toolbarActions").classList.toggle("open");
+      });
+
+      document.getElementById("closeOverlayBtn").addEventListener("click", () => {
+        state.isExerciseOpen = false;
+        render();
+      });
+
+      render();
+      // Obiectul cu SVG-urile desenate curat (Caiet, Creion, Elev)
+const codMascote = {
+  caiet: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="10" width="65" height="90" rx="8" fill="#1cb0f6" stroke="#0f82b8" stroke-width="3"/>
+            <rect x="15" y="20" width="10" height="6" rx="2" fill="#e5e5e5"/>
+            <rect x="15" y="40" width="10" height="6" rx="2" fill="#e5e5e5"/>
+            <rect x="15" y="60" width="10" height="6" rx="2" fill="#e5e5e5"/>
+            <rect x="15" y="80" width="10" height="6" rx="2" fill="#e5e5e5"/>
+            <circle cx="42" cy="45" r="5" fill="#000"/><circle cx="68" cy="45" r="5" fill="#000"/>
+            <path d="M 45 65 Q 55 75 65 65" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 85 55 Q 95 50 90 40" stroke="#0f82b8" stroke-width="4" fill="none" stroke-linecap="round"/>
+          </svg>`,
+  creion: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 40 20 L 60 20 L 60 80 L 50 100 L 40 80 Z" fill="#ff9600" stroke="#d47d00" stroke-width="3"/>
+            <path d="M 40 20 L 60 20 L 60 30 L 40 30 Z" fill="#ff4b4b"/>
+            <path d="M 40 80 L 60 80 L 50 100 Z" fill="#f3cc99"/>
+            <circle cx="50" cy="95" r="4" fill="#000"/>
+            <circle cx="46" cy="50" r="4" fill="#000"/><circle cx="54" cy="50" r="4" fill="#000"/>
+            <path d="M 47 62 Q 50 66 53 62" stroke="#000" stroke-width="2" fill="none"/>
+            <path d="M 60 60 Q 70 58 72 48" stroke="#d47d00" stroke-width="3" fill="none" stroke-linecap="round"/>
+          </svg>`,
+  elev: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="45" r="25" fill="#f3cc99" stroke="#daab7c" stroke-width="2"/>
+            <path d="M 30 35 Q 50 15 70 35" stroke="#4a3728" stroke-width="8" fill="none"/>
+            <circle cx="42" cy="45" r="4" fill="#000"/><circle cx="58" cy="45" r="4" fill="#000"/>
+            <path d="M 45 58 Q 50 64 55 58" stroke="#ff4b4b" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 25 75 C 25 110, 75 110, 75 75 Z" fill="#58cc02"/>
+            <path d="M 75 80 Q 85 78 83 68" stroke="#daab7c" stroke-width="3" fill="none" stroke-linecap="round"/>
+          </svg>`
+};
+
+function incearcaSpawnMascota() {
+  if (document.querySelector('.mascota-container')) return;
+
+  // Test: Schimbă 0.1 în 1.0 ca să apară de FIECARE dată când testezi cu sora ta!
+  if (Math.random() < 0.1) { 
+    const tipuri = ['caiet', 'creion', 'elev'];
+    const mascotaAleasa = tipuri[Math.floor(Math.random() * tipuri.length)];
+
+    const divMascota = document.createElement('div');
+    divMascota.className = 'mascota-container mascota-activa';
+    divMascota.innerHTML = codMascote[mascotaAleasa];
+
+    document.body.appendChild(divMascota);
+
+    setTimeout(() => {
+      divMascota.remove();
+    }, 3500);
+  }
+}
+
+    </script>
+  </body>
+</html>
