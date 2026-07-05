@@ -472,6 +472,15 @@
         feedbackText: ""
       };
 
+if (localStorage.getItem('salvare_xp') !== null) {
+
+    state.xp = parseInt(localStorage.getItem('salvare_xp'));
+}
+
+if (localStorage.getItem('salvare_nivel') !== null) {
+ 
+    state.level = parseInt(localStorage.getItem('salvare_nivel'));
+}
       const lessons = {
         "clasa-i": {
           romana: [
@@ -489,7 +498,7 @@
                     { prompt: "În ce cuvânt auzim litera 'a' la început?", options: ["acasă", "mare", "pisică", "copac"], correct: 0, answerType: "startsWithLetter", expectedStartLetter: "a", explanation: "În cuvântul 'acasă' litera a apare la început." },
                     { prompt: "Care este litera finală din cuvântul 'pădure' ?", options: ["p", "ă", "u", "e"], correct: 3, explanation: "Cuvântul 'pădure' se termină în litera e." },
                     { prompt: "Care este primul sunet din cuvântul 'lup' ?", options: ["/l/", "/u/", "/p/", "/a/"], correct: 0, explanation: "Primul sunet este /l/." },
-                    { prompt: "Ce literă NU se potriveste în cuvantul ' _asă '?", options: ["c", "m", "p", "s"], correct: 1, explanation: "Cuvântul este 'casă'." },
+                    { prompt: "Ce literă NU se potriveste în cuvantul ' _asă '?", options: ["c", "m", "p", "s"], correct: 3, explanation: "Cuvântul care nu se potriveste este 'sasǎ'." },
                     { prompt: "În ce cuvânt auzim sunetul /b/?", options: ["mare", "bun", "sare", "lapte"], correct: 1, explanation: "În cuvântul 'bun' auzim sunetul /b/." },
                     { prompt: "Care litera apare după 'm' în 'mare' ?", options: ["a", "r", "e", "m"], correct: 0, explanation: "După m urmează a." },
                     { prompt: "Ce literă auzi la sfârșitul cuvântului 'copi' ?", options: ["c", "o", "p", "i"], correct: 3, explanation: "Cuvântul se termină cu litera i." },
@@ -1051,6 +1060,13 @@
           state.feedbackClass = "correct";
           state.feedbackText = `Corect! ${exercise.explanation} Ai primit 20 XP.`;
           incearcaSpawnMascota();
+          
+localStorage.setItem('salvare_xp', state.xp);
+
+
+if (state.level !== undefined) {
+    localStorage.setItem('salvare_nivel', state.level);
+}
         } else {
           state.feedbackClass = "wrong";
           state.feedbackText = `Nu este corect. ${exercise.explanation}`;
